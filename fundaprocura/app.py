@@ -1,45 +1,99 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMenuBar, QMenu, QAction, QMainWindow, QGridLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QMenuBar, QMenu, QAction, QMainWindow, QGridLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QComboBox
 from PyQt5.QtCore import Qt
-from donaciones import donacion
-from instituciones import instituciones
-from casos import casos
-from historial_donaciones import historial_donaciones
-from getDonaciones import getDonaciones
-from getInstituciones import getInstituciones
-
+from modulos.donaciones import donacion
+from modulos.instituciones import instituciones
+from modulos.casos import casos
+from modulos.historial_donaciones import historial_donaciones
+from modulos.getDonaciones import getDonaciones
+from modulos.getInstituciones import getInstituciones
+from modulos.getCasos import getCasos
+from modulos.estadisticas import Estadisticas, EstadoCasos, CasosClasificacion
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Crear botones
-        self.donacion_button = QPushButton("Registrar Donación")
-        self.getdonacion_button = QPushButton("Ver Donaciones")
-        self.institucion_button = QPushButton("Registrar Institución")
-        self.casos_button = QPushButton("Registrar Caso")
-        self.historial_donaciones_button = QPushButton("Asignar donación a Caso")
-        self.getinstituciones_button = QPushButton("Ver Instituciones")
+        # Create a widget to hold the comboboxes
+        combobox_widget = QWidget()
+        combobox_layout = QHBoxLayout(combobox_widget)
 
-        # Conectar botones a funciones
-        self.donacion_button.clicked.connect(self.show_donacion_window)
-        self.getdonacion_button.clicked.connect(self.show_getdonacion_window)
-        self.institucion_button.clicked.connect(self.show_instutuciones_window)
-        self.casos_button.clicked.connect(self.show_casos_window)
-        self.historial_donaciones_button.clicked.connect(self.show_historial_donaciones_window)
-        self.getinstituciones_button.clicked.connect(self.show_getinstituciones_window)
+        # Crear combobox
+        self.combobox = QComboBox()
+        self.combobox.addItem("Donaciones")
+        self.combobox.addItem("Registrar Donación")
+        self.combobox.addItem("Ver Donaciones")
 
-        # Crear layout
+        self.combobox2 = QComboBox()
+        self.combobox2.addItem("Instituciones")
+        self.combobox2.addItem("Ver Instituciones")
+        self.combobox2.addItem("Registrar Institución")
+
+        self.combobox3 = QComboBox()
+        self.combobox3.addItem("Casos")
+        self.combobox3.addItem("Registrar Caso")
+        self.combobox3.addItem("Asignar donación a Caso")
+        self.combobox3.addItem("Ver CASOS")
+
+        self.combobox4 = QComboBox()
+        self.combobox4.addItem("Filtros")
+        self.combobox4.addItem("Estadisticas")
+        self.combobox4.addItem("Número de casos por estado")
+        self.combobox4.addItem("Número de casos por clafisicación")
+
+        # Conectar el combobox a funciones
+        self.combobox.currentIndexChanged.connect(self.combobox_selected)
+        self.combobox2.currentIndexChanged.connect(self.combobox_selected2)
+        self.combobox3.currentIndexChanged.connect(self.combobox_selected3)
+        self.combobox4.currentIndexChanged.connect(self.combobox_selected4)
+
+        # Add comboboxes to the layout
+        combobox_layout.addWidget(self.combobox)
+        combobox_layout.addWidget(self.combobox2)
+        combobox_layout.addWidget(self.combobox3)
+        combobox_layout.addWidget(self.combobox4)
+
+        # Create a main layout
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.donacion_button)
-        self.layout.addWidget(self.getdonacion_button)
-        self.layout.addWidget(self.institucion_button)
-        self.layout.addWidget(self.casos_button)
-        self.layout.addWidget(self.historial_donaciones_button)
-        self.layout.addWidget(self.getinstituciones_button)
+
+        # Add the combobox widget to the main layout
+        self.layout.addWidget(combobox_widget)
 
         # Set the layout for the main window
         self.setLayout(self.layout)
+
+        self.resize(500, 150)
+
+
+    def combobox_selected(self, index):
+        if index == 1:
+            self.show_donacion_window()
+        elif index == 2:
+            self.show_getdonacion_window()
+
+
+    def combobox_selected2(self, index2):
+        if index2 == 1:
+            self.show_getinstituciones_window()
+        elif index2 == 2:
+            self.show_instutuciones_window()
+
+
+    def combobox_selected3(self, index3):
+        if index3 == 1:
+            self.show_casos_window()
+        elif index3 == 2:
+            self.show_historial_donaciones_window()
+        elif index3 == 3:
+            self.show_getcasos_window()
+
+    def combobox_selected4(self, index4):
+        if index4 == 1:
+            self.show_estadisticas_window()
+        elif index4 == 2:
+            self.show_estadocaso_window()
+        elif index4 == 3:
+            self.show_casoclasificacion()
 
     def show_donacion_window(self):
         # Crear y mostrar la ventana de donaciones
@@ -70,6 +124,28 @@ class MainWindow(QWidget):
         # Crear y mostrar la ventana de donaciones
         self.getinstituciones_window = getInstituciones()
         self.getinstituciones_window.show()
+
+    def show_getcasos_window(self):
+        # Crear y mostrar la ventana de donaciones
+        self.getcasos_window = getCasos()
+        self.getcasos_window.show()
+
+    def show_estadisticas_window(self):
+        # Crear y mostrar la ventana de donaciones
+        self.estadistica_window = Estadisticas()
+        self.estadistica_window.show()
+
+    def show_estadocaso_window(self):
+        # Crear y mostrar la ventana de donaciones
+        self.estadocaso_window = EstadoCasos()
+        self.estadocaso_window.show()
+
+    def show_casoclasificacion(self):
+        # Crear y mostrar la ventana de donaciones
+        self.casoclasificacion_window = CasosClasificacion()
+        self.casoclasificacion_window.show()
+
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

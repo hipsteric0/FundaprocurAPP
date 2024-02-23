@@ -12,7 +12,7 @@ def getDonaciones():
 
     # Create the table view
     table_view = QTableView()
-    table_view.setFixedSize(1500, 400)
+    table_view.setFixedSize(1000, 400)
     table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
     table_view.resizeRowsToContents()
     table_view.resizeColumnsToContents()    

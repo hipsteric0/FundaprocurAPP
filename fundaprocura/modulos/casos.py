@@ -269,7 +269,7 @@ def insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, 
     grupo = grupo_input.text()
     fecha_caso = fecha_caso_input.text() or None
     ref = ref_input.text()
-    cedula = cedula_input.text() or None
+    cedula = int(cedula_input.text() or 0)
     apellidos = apellidos_input.text()
     nombres = nombres_input.text()
     sexo = sexo_input.text()
@@ -290,7 +290,7 @@ def insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, 
     serie = serie_input.text()
     control_WF = control_WF_input.text()
     nombre_familiar = nombre_familiar_input.text()
-    cedula_familiar = cedula_familiar_input.text() or None
+    cedula_familiar = int(cedula_familiar_input.text() or 0)
     direccion_familiar = direccion_familiar_input.toPlainText()
     telefono_familiar = telefono_familiar_input.text()
     recaudos = recaudos_input.toPlainText()
