@@ -35,6 +35,7 @@ def display_details(item):
 
     result = item.data(QtCore.Qt.UserRole)
     details_window = QDialog()
+    details_window.setWindowTitle("Información del Caso")
     details_layout = QGridLayout()
 
     # Create the course information group box
@@ -282,9 +283,60 @@ def display_details(item):
     observaciones_comentarios_input.setPlainText(str(result[31]))
     course_layout.addWidget(observaciones_comentarios_input, 17, 3)
 
+    historico = QListWidget()
+    historico.setFixedSize(600, 100)
+
     id = result[0]
 
-    # Rest of the code remains the same
+    connection = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="admin",
+        database="fundaprocura"
+    )
+
+    cursor = connection.cursor()
+    query = """
+    SELECT
+                hd.id AS id_historico,
+                hd.fecha_prestada AS fecha_prestada,
+                hd.equipo AS equipo_prestado,
+                hd.fecha_devolucion AS fecha_devolucion,
+                d.id AS id_donacion,
+                d.fecha_donancion AS fecha_donacion,
+                d.equipo AS equipo_donado,
+                d.observaciones AS observaciones,
+                i.nombre AS institucionhistorico_donaciones
+            FROM
+                fundaprocura.historico_donaciones hd
+            JOIN
+                fundaprocura.donaciones d ON hd.fk_donacion = d.id
+            JOIN
+                fundaprocura.casos c ON hd.fk_caso = c.id
+            JOIN
+                fundaprocura.instituciones i ON d.fk_institucion = i.id
+            WHERE
+                c.id = %s
+            ORDER BY
+                hd.fecha_prestada ASC;"""
+    cursor.execute(query, (id,))
+    results = cursor.fetchall()
+
+    # Clear the list widget
+    historico.clear()
+
+    # Display the results
+    for result in results:
+        item = QListWidgetItem(f"Fecha prestada: {result[1]}, Fecha devolución: {result[3]}, Equipo: {result[6]}, Observaciones: {result[2]}")
+        item.setData(QtCore.Qt.UserRole, result)
+        historico.addItem(item)
+
+
+        # Rest of the code remains the same
+    lista_group_box = QGroupBox()
+    lista_layaout = QHBoxLayout()
+    lista_group_box.setLayout(lista_layaout)
+    lista_layaout.addWidget(historico)
 
     buttons_group_box = QGroupBox()
     buttons_layout = QHBoxLayout()
@@ -299,10 +351,70 @@ def display_details(item):
 
     # Agrega el grupo de botones al layout
     course_layout.addWidget(buttons_group_box)
+
+    # Agrega el grupo de listas al layout
+    course_layout.addWidget(lista_group_box)
+
     update_button.clicked.connect(lambda: insert_data(details_window,id,grupo_input, ref_input, cedula_input, apellidos_input, nombres_input,sexo_input, direccion_input, telefono_input,correo_input, locacion_don_input, causa_input, lesion_input, lugar_nacimiento_input, equipo_actual_input, donacion_input, medidas_input, medidas_instrucciones_input,  serie_input, control_WF_input, nombre_familiar_input, cedula_familiar_input, direccion_familiar_input, telefono_familiar_input, recaudos_input,fk_tipo_caso_input, fk_municipio_ciudad_input, observaciones_comentarios_input))
 
     # Set the layout for the dialog
     details_window.setLayout(course_layout)
+
+
+    equipo_label = QLabel("Equipo:")
+    equipo_input = QComboBox()
+    fecha_prestada_label = QLabel("Fecha prestada:")
+    fecha_prestada_input = QLineEdit()
+    fecha_devolucion_label = QLabel("Fecha devolución:")
+    fecha_devolucion_input = QLineEdit()
+    observaciones_label = QLabel("Observaciones")
+    observaciones_input = QPlainTextEdit()
+
+    # Conexión y cursor
+    cnx = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="admin",
+        database="fundaprocura"
+    )
+
+     # Obtener donaciones
+    query = "SELECT id, equipo FROM fundaprocura.donaciones"
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    donaciones = cursor.fetchall()
+    equipo_input.addItem("Equipo")
+    for donacion in donaciones:
+        equipo_input.addItem(str(donacion[1]))
+    cursor.close()
+    cnx.close()
+
+    course_layout.addWidget(equipo_label, 18, 1)
+    course_layout.addWidget(equipo_input, 19, 1)
+    course_layout.addWidget(fecha_prestada_label, 18, 3)
+    course_layout.addWidget(fecha_prestada_input, 19, 3)
+    course_layout.addWidget(fecha_devolucion_label, 18, 5)
+    course_layout.addWidget(fecha_devolucion_input, 19, 5)
+    course_layout.addWidget(observaciones_label, 18, 7)
+    course_layout.addWidget(observaciones_input, 19 ,7)
+    
+    
+    # Add buttons to the buttons group box
+    next_button = QPushButton("Registrar")
+    next_button.setAutoDefault(False)
+    next_button.setFixedSize(250, 30)
+
+    buttons_layout.addWidget(next_button)
+
+    # Add the buttons group box to the course layout
+    course_layout.addWidget(buttons_group_box, 20, 0, 1, 8)
+
+    # Rest of the code remains the same
+
+    # Set the layout for the dialog
+    details_window.setLayout(course_layout)
+    next_button.clicked.connect(lambda: insert_historico(details_window, id, equipo_input, fecha_prestada_input, fecha_devolucion_input, observaciones_input, donaciones))
+    
     details_window.exec_()
 
 
@@ -356,6 +468,43 @@ def insert_data(details_window, id, grupo_input, ref_input, cedula_input, apelli
     details_window.close()
 
 
+def insert_historico(details_window, id, equipo_input, fecha_prestada_input, fecha_devolucion_input, observaciones_input, donaciones):
+    # Conexión a la BD y cursor
+    cnx = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="admin",
+        database="fundaprocura"
+    )
+
+    # Obtener el valor de los inputs
+    caso = id
+    equipo = 0 or None
+    fecha_prestada = fecha_prestada_input.text() or None
+    fecha_devolucion = fecha_devolucion_input.text() or None
+    observaciones = observaciones_input.toPlainText()
+
+    
+    # Encuentra el índice de la institución seleccionada.
+    selected_equipo_index = equipo_input.currentIndex()
+
+    # Si se selecciona una institución válida y obetiene su ID.
+    if selected_equipo_index > 0:
+        equipo = donaciones[selected_equipo_index - 1][0]
+
+
+    #Guardar donaciones
+    query = "INSERT INTO fundaprocura.historico_donaciones (fk_caso, fk_donacion, fecha_prestada, fecha_devolucion, equipo) VALUES (%s,%s,%s,%s,%s)"
+    cursor = cnx.cursor()
+    cursor.execute(query, (caso,equipo,fecha_prestada,fecha_devolucion, observaciones))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+    details_window.close()
+
+
+
 # PyQt5 application
 class getCasos(QWidget):
     def __init__(self):
@@ -366,7 +515,9 @@ class getCasos(QWidget):
     def init_ui(self):
         self.layout = QVBoxLayout()
         self.line_edit = QLineEdit(self)
-        self.button = QPushButton("Search", self)
+        self.button = QPushButton("Buscar", self)
+        self.setWindowTitle("Buscar Casos")
+        self.resize(400, 400)
         self.list_widget = QListWidget(self)
 
         # Connect the button to the search function

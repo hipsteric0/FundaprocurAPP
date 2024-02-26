@@ -20,24 +20,24 @@ class MainWindow(QWidget):
 
         # Crear combobox
         self.combobox = QComboBox()
-        self.combobox.addItem("Donaciones")
+        self.combobox.addItem("---Donaciones---")
         self.combobox.addItem("Registrar Donación")
         self.combobox.addItem("Ver Donaciones")
 
         self.combobox2 = QComboBox()
-        self.combobox2.addItem("Instituciones")
+        self.combobox2.addItem("---Instituciones---")
         self.combobox2.addItem("Ver Instituciones")
         self.combobox2.addItem("Registrar Institución")
 
         self.combobox3 = QComboBox()
-        self.combobox3.addItem("Casos")
+        self.combobox3.addItem("---Casos---")
         self.combobox3.addItem("Registrar Caso")
         self.combobox3.addItem("Asignar donación a Caso")
-        self.combobox3.addItem("Ver CASOS")
+        self.combobox3.addItem("Buscar Casos")
 
         self.combobox4 = QComboBox()
-        self.combobox4.addItem("Filtros")
-        self.combobox4.addItem("Estadisticas")
+        self.combobox4.addItem("---Filtros---")
+        self.combobox4.addItem("Rango de edad")
         self.combobox4.addItem("Número de casos por estado")
         self.combobox4.addItem("Número de casos por clafisicación")
 

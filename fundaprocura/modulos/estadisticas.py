@@ -69,7 +69,7 @@ class Estadisticas(QWidget):
             self.results_table.setItem(i, 3, QTableWidgetItem(str(edad)))
 
         # Display the number of cases found
-        self.num_cases_label.setText(f"Número de persoanas: {len(cases)}")
+        self.num_cases_label.setText(f"Número de personas: {len(cases)}")
 
         # Display the percentage of cases
         if total_cases > 0:
@@ -196,7 +196,8 @@ class CasosClasificacion:
                         WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 0 AND 11 THEN 'Niño'
                         WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 12 AND 17 THEN 'Adolescente'
                         WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 18 AND 59 THEN 'Adulto'
-                        ELSE 'Adulto mayor'
+                        WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 60 AND 110 THEN 'Adulto mayor'
+                        ELSE 'N/A'
                     END as clasificacion_edad
                 FROM fundaprocura.casos
             ) as categorized_ages

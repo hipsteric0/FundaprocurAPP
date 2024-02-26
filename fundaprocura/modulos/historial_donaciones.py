@@ -63,6 +63,7 @@ def display_details(item):
 
     result = item.data(QtCore.Qt.UserRole)
     details_window = QDialog()
+    details_window.setWindowTitle("Historial de donaciones")
     details_layout = QGridLayout()
 
     # Create the course information group box
@@ -207,8 +208,10 @@ class historial_donaciones(QWidget):
 
     def init_ui(self):
         self.layout = QVBoxLayout()
+        self.setWindowTitle("Historial de donaciones")
+        self.resize(400, 400)
         self.line_edit = QLineEdit(self)
-        self.button = QPushButton("Search", self)
+        self.button = QPushButton("Buscar", self)
         self.list_widget = QListWidget(self)
 
         # Connect the button to the search function
