@@ -3,33 +3,35 @@ from PyQt5.QtWidgets import QGroupBox, QGridLayout, QHBoxLayout, QLineEdit, QWid
 import mysql.connector
 
 def casos():
-    # Create the dialog
+    # Crea la ventana
     dialog = QDialog()
     dialog.setWindowTitle("Registro de Casos")
     dialog.setGeometry(100, 100, 1500, 400)
 
-    # Create the layout
+    # Crea el layout
     layout = QVBoxLayout()
 
-    # Create the course information group box
+    # Creaa el cuadro de Información personal 
     course_group_box = QGroupBox("Infomación Personal")
     course_layout = QGridLayout()
     course_group_box.setLayout(course_layout)
 
+    # Creaa el cuadro de Información accidente
     course_group_box_2 = QGroupBox("Infomación Accidente")
     course_layout_2 = QGridLayout()
     course_group_box_2.setLayout(course_layout_2)
 
+    # Creaa el cuadro de Información pariente
     course_group_box_3 = QGroupBox("Infomación Pariente")
     course_layout_3 = QGridLayout()
     course_group_box_3.setLayout(course_layout_3)
 
-    # Create the buttons group box
+    # Craea el cuadro del botón
     buttons_group_box = QGroupBox()
     buttons_layout = QHBoxLayout()
     buttons_group_box.setLayout(buttons_layout)
 
-    #Inputs
+    # Crea los labels e inputs
     grupo_label = QLabel("Grupo: ")
     grupo_input = QLineEdit()
     fecha_caso_label = QLabel("Fecha caso: ")
@@ -130,7 +132,7 @@ def casos():
         database="fundaprocura"
     )
 
-    # Get clasificación
+    # Obtener clasificaciones para el combobox
     query = "SELECT id, nombre FROM fundaprocura.clasificacion"
     cursor = cnx.cursor()
     cursor.execute(query)
@@ -141,7 +143,7 @@ def casos():
     cursor.close()
 
 
-    # Get estados
+    # Obtener Estados para el combobox
     query = "SELECT id, nombre FROM fundaprocura.estado"
     cursor = cnx.cursor()
     cursor.execute(query)
@@ -152,7 +154,7 @@ def casos():
     cursor.close()
 
 
-    # Get parentesco
+    # Obtener parentesco para el combobox
     query = "SELECT id, nombre FROM fundaprocura.parentesco"
     cursor = cnx.cursor()
     cursor.execute(query)
@@ -235,27 +237,29 @@ def casos():
     course_layout_3.addWidget(observaciones_comentarios_input, 17, 3)
 
     
-    # Add buttons to the buttons group box
+    # Agrega el botón Registrar
     next_button = QPushButton("Registrar")
     next_button.setAutoDefault(False)
     next_button.setFixedSize(250, 30)
 
     buttons_layout.addWidget(next_button)
 
+    # Orden de los componentes
     layout.addWidget(course_group_box)
     layout.addWidget(course_group_box_2)
     layout.addWidget(course_group_box_3)
     layout.addWidget(buttons_group_box)
     
 
-    # Set the layout for the dialog
+    # Agrega el layout en la ventana
     dialog.setLayout(layout)
 
-    # Connect the buttons to their respective functions
+    # Conecta el botón Registrar con la función insert_data
     next_button.clicked.connect(lambda: insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, apellidos_input, nombres_input,sexo_input, direccion_input, telefono_input,correo_input, locacion_don_input, fecha_accidente_input, causa_input, lesion_input, fecha_nacimiento_input, lugar_nacimiento_input, equipo_actual_input, donacion_input, medidas_input, medidas_instrucciones_input, ultima_medicion_input, serie_input, control_WF_input, nombre_familiar_input, cedula_familiar_input, direccion_familiar_input, telefono_familiar_input, recaudos_input,fk_tipo_caso_input, fk_clasificacion_input, fk_estado_input, fk_municipio_ciudad_input, fk_parentesco_input, observaciones_comentarios_input, clasificaciones, estados, parentescos))
 
     return dialog
 
+#Esta función guarda la información del formulario en la BD
 def insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, apellidos_input, nombres_input,sexo_input, direccion_input, telefono_input, correo_input, locacion_don_input, fecha_accidente_input, causa_input, lesion_input, fecha_nacimiento_input, lugar_nacimiento_input, equipo_actual_input, donacion_input, medidas_input, medidas_instrucciones_input, ultima_medicion_input, serie_input, control_WF_input, nombre_familiar_input, cedula_familiar_input, direccion_familiar_input, telefono_familiar_input, recaudos_input,fk_tipo_caso_input, fk_clasificacion_input, fk_estado_input, fk_municipio_ciudad_input, fk_parentesco_input, observaciones_comentarios_input, clasificaciones, estados, parentescos):
     # Conexión a la BD y cursor
     cnx = mysql.connector.connect(
@@ -265,7 +269,7 @@ def insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, 
         database="fundaprocura"
     )
 
-     # Obtener el valor de los inputs
+     # Obtiene el valor de los inputs
     grupo = grupo_input.text()
     fecha_caso = fecha_caso_input.text() or None
     ref = ref_input.text()
@@ -302,28 +306,30 @@ def insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, 
     fk_parentesco = 0 or None
 
 
-    # Find the index of the selected institution type
+    # Busca el índice de la clasificación seleccionada
     selected_calsificacion_index = fk_clasificacion_input.currentIndex()
 
-    # If a valid institution type is selected, get its id
+    # Válida la clasificación seleccionada
     if selected_calsificacion_index > 0:
         fk_clasificacion = clasificaciones[selected_calsificacion_index - 1][0]
 
+
+     # Busca el índice del Estado seleccioando
     selected_estado_index = fk_estado_input.currentIndex()
 
-    # If a valid institution type is selected, get its id
+    # Válida el Estado seleccionado
     if selected_estado_index > 0:
         fk_estado = estados[selected_estado_index - 1][0]
 
-
+    # Busca el índice del parentesco seleccioando
     selected_parentesco_index = fk_parentesco_input.currentIndex()
 
-    # If a valid institution type is selected, get its id
+    # Válida el parentesco seleccionado
     if selected_parentesco_index > 0:
         fk_parentesco = parentescos[selected_parentesco_index - 1][0]
 
 
-    # Insert the data
+    # Inserta los datos en la BD
     query = "INSERT INTO fundaprocura.casos (grupo,tipo_caso,fecha,ref,cedula,apellidos,nombres,sexo,direccion,telefono,correo,locacion_don,fecha_accidente,causa,lesion,fecha_nacimiento,lugar_nacimiento,municipio_ciudad,equipo_actual,donacion,medidas,medidas_instrucciones,ultima_medicion,serie,control_WF,nombre_familiar,cedula_familiar,direccion_familiar,telefono_familiar,recaudos,observaciones_comentarios,fk_clasificacion,fk_esado,fk_parentesco) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
     cursor = cnx.cursor()
     cursor.execute(query, (grupo,fk_tipo_caso,fecha_caso,ref,cedula,apellidos,nombres,sexo,direccion,telefono,correo,locacion_don,fecha_accidente,causa,lesion,fecha_nacimiento,lugar_nacimiento,fk_municipio_ciudad,equipo_actual,donacion,medidas,medidas_instrucciones,ultima_medicion,serie,control_WF,nombre_familiar,cedula_familiar,direccion_familiar,telefono_familiar,recaudos,observaciones_comentarios,fk_clasificacion,fk_estado,fk_parentesco))
@@ -331,5 +337,5 @@ def insert_data(dialog, grupo_input, fecha_caso_input, ref_input, cedula_input, 
     cursor.close()
     cnx.close()
 
-    # Close the dialog
+    # Cierra la ventana
     dialog.close()

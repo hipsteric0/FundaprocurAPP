@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QPlainTextEdit, QWidget, QLineEdit, QPushButton, QVB
 from PyQt5.QtCore import  Qt
 from PyQt5 import QtCore
 
-# Connect to the MySQL database
+# Conexión y cursor a la BD 
 def create_connection():
     connection = mysql.connector.connect(
         host="localhost",
@@ -14,40 +14,45 @@ def create_connection():
     )
     return connection
 
-# Search function
+# Función de búqueda
 def search(name, connection, list_widget):
     cursor = connection.cursor()
+    #Query que busca por nombre los casos
     query = f"SELECT * FROM fundaprocura.casos WHERE CONCAT(nombres, ' ', apellidos) LIKE '%{name}%'"
     cursor.execute(query)
     results = cursor.fetchall()
 
-    # Clear the list widget
+    # Limpia la lista
     list_widget.clear()
 
-    # Display the results
+    # Agrega los resultados en la lista
     for result in results:
         item = QListWidgetItem(f"Caso: {result[0]}, {result[7]}, {result[6]}, CI: {result[5]}")
         item.setData(QtCore.Qt.UserRole, result)
         list_widget.addItem(item)
 
-# Function to display the details of a clicked item
+# Función que muestra los detalles del caso 
 def display_details(item):
 
+    #Rsultados de la búsqueda
     result = item.data(QtCore.Qt.UserRole)
+
+    #Crear la ventana
     details_window = QDialog()
     details_window.setWindowTitle("Información del Caso")
     details_layout = QGridLayout()
 
-    # Create the course information group box
+    # Creaa el cuadro de Información personal 
     course_group_box = QGroupBox("Infomación Personal")
     course_layout = QGridLayout()
     course_group_box.setLayout(course_layout)
 
-    # Create the buttons group box
+    # Creaa el cuadro del botón
     buttons_group_box = QGroupBox()
     buttons_layout = QHBoxLayout()
     buttons_group_box.setLayout(buttons_layout)
 
+    # Crea los labels e inputs
     grupo_label = QLabel("Grupo: ")
     grupo_input = QLineEdit()
     fecha_caso_label = QLabel("Fecha caso: ")
@@ -140,6 +145,7 @@ def display_details(item):
     fk_parentesco_input = QLineEdit()
 
 
+    #Posición de los Inputs
     course_layout.addWidget(grupo_label , 0, 0)
     grupo_input.setText(str(result[1]))
     course_layout.addWidget(grupo_input, 0, 1)
@@ -283,11 +289,14 @@ def display_details(item):
     observaciones_comentarios_input.setPlainText(str(result[31]))
     course_layout.addWidget(observaciones_comentarios_input, 17, 3)
 
+    #Lista de donaciones
     historico = QListWidget()
     historico.setFixedSize(600, 100)
 
+    #ID del caso
     id = result[0]
 
+     # Conexión a la BD y cursor
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -296,6 +305,7 @@ def display_details(item):
     )
 
     cursor = connection.cursor()
+    #Query que busca la información de las donaciones que ha recibido el caso
     query = """
     SELECT
                 hd.id AS id_historico,
@@ -322,17 +332,16 @@ def display_details(item):
     cursor.execute(query, (id,))
     results = cursor.fetchall()
 
-    # Clear the list widget
+    # Limpia la lista
     historico.clear()
 
-    # Display the results
+    # Muestra los resultados de las donaciones en la lista 
     for result in results:
         item = QListWidgetItem(f"Fecha prestada: {result[1]}, Fecha devolución: {result[3]}, Equipo: {result[6]}, Observaciones: {result[2]}")
         item.setData(QtCore.Qt.UserRole, result)
         historico.addItem(item)
 
 
-        # Rest of the code remains the same
     lista_group_box = QGroupBox()
     lista_layaout = QHBoxLayout()
     lista_group_box.setLayout(lista_layaout)
@@ -342,6 +351,7 @@ def display_details(item):
     buttons_layout = QHBoxLayout()
     buttons_group_box.setLayout(buttons_layout)
 
+    #Botón para actualizar la información del caso
     update_button = QPushButton("Actualizar")
     update_button.setFixedSize(250, 30)
     buttons_layout.addWidget(update_button)
@@ -355,12 +365,14 @@ def display_details(item):
     # Agrega el grupo de listas al layout
     course_layout.addWidget(lista_group_box)
 
+    #Conecta el botón Actualizar con la función insert_data
     update_button.clicked.connect(lambda: insert_data(details_window,id,grupo_input, ref_input, cedula_input, apellidos_input, nombres_input,sexo_input, direccion_input, telefono_input,correo_input, locacion_don_input, causa_input, lesion_input, lugar_nacimiento_input, equipo_actual_input, donacion_input, medidas_input, medidas_instrucciones_input,  serie_input, control_WF_input, nombre_familiar_input, cedula_familiar_input, direccion_familiar_input, telefono_familiar_input, recaudos_input,fk_tipo_caso_input, fk_municipio_ciudad_input, observaciones_comentarios_input))
 
-    # Set the layout for the dialog
+    # Agrega layout en la ventana
     details_window.setLayout(course_layout)
 
 
+    # Crea los labels e inputs de las donaciones
     equipo_label = QLabel("Equipo:")
     equipo_input = QComboBox()
     fecha_prestada_label = QLabel("Fecha prestada:")
@@ -389,6 +401,7 @@ def display_details(item):
     cursor.close()
     cnx.close()
 
+    #Posición de los Inputs de las donaciones 
     course_layout.addWidget(equipo_label, 18, 1)
     course_layout.addWidget(equipo_input, 19, 1)
     course_layout.addWidget(fecha_prestada_label, 18, 3)
@@ -399,25 +412,24 @@ def display_details(item):
     course_layout.addWidget(observaciones_input, 19 ,7)
     
     
-    # Add buttons to the buttons group box
+    # Agrega el botón de Registrar
     next_button = QPushButton("Registrar")
     next_button.setAutoDefault(False)
     next_button.setFixedSize(250, 30)
 
     buttons_layout.addWidget(next_button)
 
-    # Add the buttons group box to the course layout
     course_layout.addWidget(buttons_group_box, 20, 0, 1, 8)
 
-    # Rest of the code remains the same
 
-    # Set the layout for the dialog
+    # Agrega layout en la ventana
     details_window.setLayout(course_layout)
+    #Conecta el botón Registrar con la función insert_historico
     next_button.clicked.connect(lambda: insert_historico(details_window, id, equipo_input, fecha_prestada_input, fecha_devolucion_input, observaciones_input, donaciones))
     
     details_window.exec_()
 
-
+#Esta función actualiza la información del formulario en la BD
 def insert_data(details_window, id, grupo_input, ref_input, cedula_input, apellidos_input, nombres_input,sexo_input, direccion_input, telefono_input, correo_input, locacion_don_input,  causa_input, lesion_input, lugar_nacimiento_input, equipo_actual_input, donacion_input, medidas_input, medidas_instrucciones_input, serie_input, control_WF_input, nombre_familiar_input, cedula_familiar_input, direccion_familiar_input, telefono_familiar_input, recaudos_input,fk_tipo_caso_input, fk_municipio_ciudad_input, observaciones_comentarios_input):
 
     id = id
@@ -451,7 +463,7 @@ def insert_data(details_window, id, grupo_input, ref_input, cedula_input, apelli
     
 
 
-    # Insert the data
+    # Query que actualiza la información
     query = "UPDATE fundaprocura.casos SET grupo=%s, tipo_caso=%s, ref=%s, cedula=%s, apellidos=%s, nombres=%s, sexo=%s, direccion=%s, telefono=%s, correo=%s, locacion_don=%s, causa=%s, lesion=%s, lugar_nacimiento=%s, municipio_ciudad=%s, equipo_actual=%s, donacion=%s, medidas=%s, medidas_instrucciones=%s, serie=%s, control_WF=%s, nombre_familiar=%s, cedula_familiar=%s, direccion_familiar=%s, telefono_familiar=%s, recaudos=%s, observaciones_comentarios=%s WHERE id=%s"
     cnx = mysql.connector.connect(
         host="localhost",
@@ -468,6 +480,7 @@ def insert_data(details_window, id, grupo_input, ref_input, cedula_input, apelli
     details_window.close()
 
 
+#Esta función guarda la información de la donación nueva
 def insert_historico(details_window, id, equipo_input, fecha_prestada_input, fecha_devolucion_input, observaciones_input, donaciones):
     # Conexión a la BD y cursor
     cnx = mysql.connector.connect(
@@ -504,8 +517,6 @@ def insert_historico(details_window, id, equipo_input, fecha_prestada_input, fec
     details_window.close()
 
 
-
-# PyQt5 application
 class getCasos(QWidget):
     def __init__(self):
         super().__init__()
@@ -520,10 +531,10 @@ class getCasos(QWidget):
         self.resize(400, 400)
         self.list_widget = QListWidget(self)
 
-        # Connect the button to the search function
+        # Conecta el botón a la función de búsqueda.
         self.button.clicked.connect(lambda: search(self.line_edit.text(), self.connection, self.list_widget))
 
-        # Connect the list widget to the display_details function
+        # Conecta el item seleccionado con la pantalla display_details
         self.list_widget.itemClicked.connect(display_details)
 
         self.layout.addWidget(self.line_edit)
@@ -532,7 +543,7 @@ class getCasos(QWidget):
 
         self.setLayout(self.layout)
 
-        # Connect to the MySQL database
+        # Crea conexión con la BD
         self.connection = create_connection()
 
         self.show()

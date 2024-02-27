@@ -6,6 +6,8 @@ from PyQt5 import QtCore
 
 # Connect to the MySQL database
 def create_connection():
+
+    #Conexión y cursor de la BD
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -14,11 +16,12 @@ def create_connection():
     )
     return connection
 
-# Search function
+# Función buscar
 def search(name, connection, list_widget):
-    # Clear the list widget
+    # Limpia la lista
     list_widget.clear()
 
+    #Query que busca los datos de las donaciones realizadas a los Casos
     cursor = connection.cursor()
     query = """
             SELECT
@@ -52,13 +55,13 @@ def search(name, connection, list_widget):
     cursor.execute(query)
     results = cursor.fetchall()
 
-    # Display the results
+    # Agrega los resultados 
     for result in results:
         item = QListWidgetItem(f"{result[9]}, {result[10]}, FECHA: {result[1]}")
         item.setData(QtCore.Qt.UserRole, result)
         list_widget.addItem(item)
 
-# Function to display the details of a clicked item
+# Función que muestra los detalles al hacer click en el caso
 def display_details(item):
 
     result = item.data(QtCore.Qt.UserRole)
@@ -76,6 +79,7 @@ def display_details(item):
     buttons_layout = QHBoxLayout()
     buttons_group_box.setLayout(buttons_layout)
 
+    # Crea los labels e inputs de las donaciones
     fecha_donacion_label = QLabel("Fecha de donación:")
     fecha_donacion_input = QLineEdit()
     fecha_donacion_input.setReadOnly(True)
@@ -91,6 +95,7 @@ def display_details(item):
     fecha_devolucion_dato_input.setPlaceholderText("Formato: AAAA-MM-DD")
 
 
+    #Posición de los Inputs de las donaciones 
     course_layout.addWidget(fecha_donacion_label,  0, 0)
     fecha_donacion_input.setText(str(result[5]))
     course_layout.addWidget(fecha_donacion_input, 0, 1)
@@ -199,7 +204,6 @@ def insert_data(details_window, id, equipo_input, fecha_prestada_input, fecha_de
     details_window.close()
 
 
-# PyQt5 application
 class historial_donaciones(QWidget):
     def __init__(self):
         super().__init__()
