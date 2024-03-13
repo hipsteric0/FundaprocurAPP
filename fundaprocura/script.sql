@@ -79,7 +79,7 @@ CREATE TABLE fundaprocura.casos (
 
 CREATE TABLE fundaprocura.historico_donaciones (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
-    equipo VARCHAR(100) NULL,
+    equipo VARCHAR(500) NULL,
     fecha_donancion DATE NULL,
     donaciones INTEGER NULL,
     fecha_prestada DATE NULL,
